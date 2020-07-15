@@ -353,8 +353,9 @@ uptr MapDynamicShadow(uptr shadow_size_bytes, uptr shadow_scale,
                       uptr min_shadow_base_alignment) {
   const uptr granularity = GetMmapGranularity();
   const uptr alignment =
-      Max(granularity << shadow_scale, 1UL << min_shadow_base_alignment);
-  const uptr left_padding = Max(granularity, 1UL << min_shadow_base_alignment);
+      Max<uptr>(granularity << shadow_scale, 1UL << min_shadow_base_alignment);
+  const uptr left_padding =
+      Max<uptr>(granularity, 1UL << min_shadow_base_alignment);
   uptr space_size = shadow_size_bytes + left_padding;
   uptr shadow_start = FindAvailableMemoryRange(space_size, alignment,
                                                granularity, nullptr, nullptr);
