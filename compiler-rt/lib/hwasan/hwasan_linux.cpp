@@ -57,56 +57,19 @@ THREADLOCAL uptr __hwasan_tls;
 
 namespace __hwasan {
 
-static void ReserveShadowMemoryRange(uptr beg, uptr end, const char *name) {
-  CHECK_EQ((beg % GetMmapGranularity()), 0);
-  CHECK_EQ(((end + 1) % GetMmapGranularity()), 0);
-  uptr size = end - beg + 1;
-  DecreaseTotalMmap(size);  // Don't count the shadow against mmap_limit_mb.
-  if (!MmapFixedNoReserve(beg, size, name)) {
-    Report(
-        "ReserveShadowMemoryRange failed while trying to map 0x%zx bytes. "
-        "Perhaps you're using ulimit -v\n",
-        size);
-    Abort();
-  }
-}
-
 static void ProtectGap(uptr addr, uptr size) {
-  if (!size)
-    return;
-  void *res = MmapFixedNoAccess(addr, size, "shadow gap");
-  if (addr == (uptr)res)
-    return;
-  // A few pages at the start of the address space can not be protected.
-  // But we really want to protect as much as possible, to prevent this memory
-  // being returned as a result of a non-FIXED mmap().
-  if (addr == 0) {
-    uptr step = GetMmapGranularity();
-    while (size > step) {
-      addr += step;
-      size -= step;
-      void *res = MmapFixedNoAccess(addr, size, "shadow gap");
-      if (addr == (uptr)res)
-        return;
-    }
-  }
-
-  Report(
-      "ERROR: Failed to protect shadow gap [%p, %p]. "
-      "HWASan cannot proceed correctly. ABORTING.\n", (void *)addr,
-      (void *)(addr + size));
-  DumpProcessMap();
-  Die();
+  __sanitizer::ProtectGap(addr, size, kZeroBaseShadowStart,
+                          kZeroBaseMaxShadowStart);
 }
 
-static uptr kLowMemStart;
-static uptr kLowMemEnd;
-static uptr kLowShadowEnd;
-static uptr kLowShadowStart;
-static uptr kHighShadowStart;
-static uptr kHighShadowEnd;
-static uptr kHighMemStart;
-static uptr kHighMemEnd;
+uptr kLowMemStart;
+uptr kLowMemEnd;
+uptr kLowShadowEnd;
+uptr kLowShadowStart;
+uptr kHighShadowStart;
+uptr kHighShadowEnd;
+uptr kHighMemStart;
+uptr kHighMemEnd;
 
 static void PrintRange(uptr start, uptr end, const char *name) {
   Printf("|| [%p, %p] || %.*s ||\n", (void *)start, (void *)end, 10, name);
@@ -130,15 +93,6 @@ static void PrintAddressSpaceLayout() {
     CHECK_EQ(kLowMemEnd + 1, kLowShadowStart);
   PrintRange(kLowMemStart, kLowMemEnd, "LowMem");
   CHECK_EQ(0, kLowMemStart);
-}
-
-static uptr GetHighMemEnd() {
-  // HighMem covers the upper part of the address space.
-  uptr max_address = GetMaxUserVirtualAddress();
-  // Adjust max address to make sure that kHighMemEnd and kHighMemStart are
-  // properly aligned:
-  max_address |= (GetMmapGranularity() << kShadowScale) - 1;
-  return max_address;
 }
 
 static void InitializeShadowBaseAddress(uptr shadow_size_bytes) {
@@ -185,7 +139,7 @@ void InitPrctl() {
 
 bool InitShadow() {
   // Define the entire memory range.
-  kHighMemEnd = GetHighMemEnd();
+  kHighMemEnd = GetHighMemEnd(kShadowScale);
 
   // Determine shadow memory base offset.
   InitializeShadowBaseAddress(MemToShadowSize(kHighMemEnd));
@@ -242,22 +196,10 @@ void InitThreads() {
   uptr thread_space_end =
       __hwasan_shadow_memory_dynamic_address - guard_page_size;
   ReserveShadowMemoryRange(thread_space_start, thread_space_end - 1,
-                           "hwasan threads");
+                           "hwasan threads", /*madvise_shadow*/ false);
   ProtectGap(thread_space_end,
              __hwasan_shadow_memory_dynamic_address - thread_space_end);
   InitThreadList(thread_space_start, thread_space_end - thread_space_start);
-}
-
-static void MadviseShadowRegion(uptr beg, uptr end) {
-  uptr size = end - beg + 1;
-  SetShadowRegionHugePageMode(beg, size);
-  if (common_flags()->use_madv_dontdump)
-    DontDumpShadowMemory(beg, size);
-}
-
-void MadviseShadow() {
-  MadviseShadowRegion(kLowShadowStart, kLowShadowEnd);
-  MadviseShadowRegion(kHighShadowStart, kHighShadowEnd);
 }
 
 bool MemIsApp(uptr p) {

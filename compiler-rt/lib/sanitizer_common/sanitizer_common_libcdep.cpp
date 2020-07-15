@@ -139,6 +139,89 @@ uptr ReservedAddressRange::InitAligned(uptr size, uptr align,
   return start;
 }
 
+// Reserve memory range [beg, end].
+// We need to use inclusive range because end+1 may not be representable.
+void ReserveShadowMemoryRange(uptr beg, uptr end, const char *name,
+                              bool madvise_shadow) {
+  CHECK_EQ((beg % GetMmapGranularity()), 0);
+  CHECK_EQ(((end + 1) % GetMmapGranularity()), 0);
+  uptr size = end - beg + 1;
+  DecreaseTotalMmap(size);  // Don't count the shadow against mmap_limit_mb.
+  if (madvise_shadow ? !MmapFixedSuperNoReserve(beg, size, name)
+                     : !MmapFixedNoReserve(beg, size, name)) {
+    Report(
+        "ReserveShadowMemoryRange failed while trying to map 0x%zx bytes. "
+        "Perhaps you're using ulimit -v\n",
+        size);
+    Abort();
+  }
+  if (madvise_shadow && common_flags()->use_madv_dontdump)
+    DontDumpShadowMemory(beg, size);
+}
+
+void ProtectGap(uptr addr, uptr size, uptr zero_base_shadow_start,
+                uptr zero_base_max_shadow_start) {
+  if (!size)
+    return;
+  void *res = MmapFixedNoAccess(addr, size, "shadow gap");
+  if (addr == (uptr)res)
+    return;
+  // A few pages at the start of the address space can not be protected.
+  // But we really want to protect as much as possible, to prevent this memory
+  // being returned as a result of a non-FIXED mmap().
+  if (addr == zero_base_shadow_start) {
+    uptr step = GetMmapGranularity();
+    while (size > step && addr < zero_base_max_shadow_start) {
+      addr += step;
+      size -= step;
+      void *res = MmapFixedNoAccess(addr, size, "shadow gap");
+      if (addr == (uptr)res)
+        return;
+    }
+  }
+
+  Report(
+      "ERROR: Failed to protect the shadow gap. "
+      "%s cannot proceed correctly. ABORTING.\n",
+      SanitizerToolName);
+  DumpProcessMap();
+  Die();
+}
+
+static void UnmapFromTo(uptr from, uptr to) {
+  if (to == from)
+    return;
+  CHECK(to >= from);
+  uptr res = internal_munmap(reinterpret_cast<void *>(from), to - from);
+  if (UNLIKELY(internal_iserror(res))) {
+    Report("ERROR: %s failed to unmap 0x%zx (%zd) bytes at address %p\n",
+           SanitizerToolName, to - from, to - from, from);
+    CHECK("unable to unmap" && 0);
+  }
+}
+
+uptr MapDynamicShadow(uptr shadow_size_bytes, uptr shadow_scale,
+                      UNUSED uptr &high_mem_end,
+                      uptr min_shadow_base_alignment) {
+  const uptr granularity = GetMmapGranularity();
+  const uptr alignment =
+      Max(granularity << shadow_scale, 1UL << min_shadow_base_alignment);
+  const uptr left_padding = Max(granularity, 1UL << min_shadow_base_alignment);
+
+  const uptr shadow_size = RoundUpTo(shadow_size_bytes, granularity);
+  const uptr map_size = shadow_size + left_padding + alignment;
+
+  const uptr map_start = (uptr)MmapNoAccess(map_size);
+  CHECK_NE(map_start, ~(uptr)0);
+
+  const uptr shadow_start = RoundUpTo(map_start + left_padding, alignment);
+
+  UnmapFromTo(map_start, shadow_start - left_padding);
+  UnmapFromTo(shadow_start + shadow_size, map_start + map_size);
+
+  return shadow_start;
+}
+
 }  // namespace __sanitizer
 
 SANITIZER_INTERFACE_WEAK_DEF(void, __sanitizer_sandbox_on_notify,

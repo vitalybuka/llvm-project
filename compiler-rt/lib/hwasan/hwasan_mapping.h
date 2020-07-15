@@ -37,7 +37,21 @@
 constexpr uptr kShadowScale = 4;
 constexpr uptr kShadowAlignment = 1ULL << kShadowScale;
 
+// With the zero shadow base we can not actually map pages starting from 0.
+// This constant is somewhat arbitrary.
+constexpr uptr kZeroBaseShadowStart = 0;
+constexpr uptr kZeroBaseMaxShadowStart = 1 << 18;
+
 namespace __hwasan {
+
+extern uptr kLowMemStart;
+extern uptr kLowMemEnd;
+extern uptr kLowShadowEnd;
+extern uptr kLowShadowStart;
+extern uptr kHighShadowStart;
+extern uptr kHighShadowEnd;
+extern uptr kHighMemStart;
+extern uptr kHighMemEnd;
 
 inline uptr MemToShadow(uptr untagged_addr) {
   return (untagged_addr >> kShadowScale) +

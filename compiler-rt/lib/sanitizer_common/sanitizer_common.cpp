@@ -84,6 +84,15 @@ const char *StripModuleName(const char *module) {
   return module;
 }
 
+uptr GetHighMemEnd(uptr shadow_scale) {
+  // HighMem covers the upper part of the address space.
+  uptr max_address = GetMaxUserVirtualAddress();
+  // Adjust max address to make sure that high mem end and high mem start are
+  // properly aligned:
+  max_address |= (GetMmapGranularity() << shadow_scale) - 1;
+  return max_address;
+}
+
 void ReportErrorSummary(const char *error_message, const char *alt_tool_name) {
   if (!common_flags()->print_summary)
     return;
