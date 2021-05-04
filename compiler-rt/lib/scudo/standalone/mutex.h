@@ -48,7 +48,7 @@ private:
   static constexpr u8 NumberOfYields = 8U;
 
 #if SCUDO_LINUX
-  atomic_u32 M;
+  atomic_u32 M = {};
 #elif SCUDO_FUCHSIA
   sync_mutex_t M;
 #endif
