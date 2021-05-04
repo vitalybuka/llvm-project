@@ -50,7 +50,7 @@ private:
 #if SCUDO_LINUX
   atomic_u32 M = {};
 #elif SCUDO_FUCHSIA
-  sync_mutex_t M;
+  sync_mutex_t M = {};
 #endif
 
   void lockSlow();
