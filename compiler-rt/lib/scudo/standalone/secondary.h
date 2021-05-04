@@ -383,10 +383,10 @@ private:
   atomic_uptr MaxEntrySize = {};
   u64 OldestTime = 0;
   u32 IsFullEvents = 0;
-  atomic_s32 ReleaseToOsIntervalMs;
+  atomic_s32 ReleaseToOsIntervalMs = {};
 
-  CachedBlock Entries[Config::SecondaryCacheEntriesArraySize];
-  CachedBlock Quarantine[Config::SecondaryCacheQuarantineSize];
+  CachedBlock Entries[Config::SecondaryCacheEntriesArraySize] = {};
+  CachedBlock Quarantine[Config::SecondaryCacheQuarantineSize] = {};
 };
 
 template <typename Config> class MapAllocator {
