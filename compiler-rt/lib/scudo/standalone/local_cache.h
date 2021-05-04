@@ -140,7 +140,7 @@ private:
   };
   PerClass PerClassArray[NumClasses];
   LocalStats Stats;
-  SizeClassAllocator *Allocator;
+  SizeClassAllocator *Allocator = nullptr;
 
   ALWAYS_INLINE void initCacheMaybe(PerClass *C) {
     if (LIKELY(C->MaxCount))
