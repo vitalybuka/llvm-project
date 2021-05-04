@@ -379,8 +379,8 @@ private:
   HybridMutex Mutex;
   u32 EntriesCount = 0;
   u32 QuarantinePos = 0;
-  atomic_u32 MaxEntriesCount;
-  atomic_uptr MaxEntrySize;
+  atomic_u32 MaxEntriesCount = {};
+  atomic_uptr MaxEntrySize = {};
   u64 OldestTime = 0;
   u32 IsFullEvents = 0;
   atomic_s32 ReleaseToOsIntervalMs;
