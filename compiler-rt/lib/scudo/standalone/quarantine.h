@@ -161,7 +161,7 @@ public:
 
 private:
   SinglyLinkedList<QuarantineBatch> List;
-  atomic_uptr Size;
+  atomic_uptr Size = {};
 
   void addToSize(uptr add) { atomic_store_relaxed(&Size, getSize() + add); }
   void subFromSize(uptr sub) { atomic_store_relaxed(&Size, getSize() - sub); }

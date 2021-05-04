@@ -296,7 +296,7 @@ private:
   };
   struct RegionInfo : UnpaddedRegionInfo {
     char Padding[SCUDO_CACHE_LINE_SIZE -
-                 (sizeof(UnpaddedRegionInfo) % SCUDO_CACHE_LINE_SIZE)];
+                 (sizeof(UnpaddedRegionInfo) % SCUDO_CACHE_LINE_SIZE)] = {};
   };
   static_assert(sizeof(RegionInfo) % SCUDO_CACHE_LINE_SIZE == 0, "");
 
