@@ -285,14 +285,14 @@ private:
   struct UnpaddedRegionInfo {
     HybridMutex Mutex;
     SinglyLinkedList<TransferBatch> FreeList;
-    uptr RegionBeg;
-    RegionStats Stats;
-    u32 RandState;
-    uptr MappedUser;    // Bytes mapped for user memory.
-    uptr AllocatedUser; // Bytes allocated for user memory.
-    MapPlatformData Data;
-    ReleaseToOsInfo ReleaseInfo;
-    bool Exhausted;
+    uptr RegionBeg = 0;
+    RegionStats Stats = {};
+    u32 RandState = 0;
+    uptr MappedUser = 0;    // Bytes mapped for user memory.
+    uptr AllocatedUser = 0; // Bytes allocated for user memory.
+    MapPlatformData Data = {};
+    ReleaseToOsInfo ReleaseInfo = {};
+    bool Exhausted = false;
   };
   struct RegionInfo : UnpaddedRegionInfo {
     char Padding[SCUDO_CACHE_LINE_SIZE -
