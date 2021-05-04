@@ -300,9 +300,9 @@ private:
   };
   static_assert(sizeof(RegionInfo) % SCUDO_CACHE_LINE_SIZE == 0, "");
 
-  uptr PrimaryBase;
-  MapPlatformData Data;
-  atomic_s32 ReleaseToOsIntervalMs;
+  uptr PrimaryBase = 0;
+  MapPlatformData Data = {};
+  atomic_s32 ReleaseToOsIntervalMs = {};
   alignas(SCUDO_CACHE_LINE_SIZE) RegionInfo RegionInfoArray[NumClasses];
 
   RegionInfo *getRegionInfo(uptr ClassId) {
