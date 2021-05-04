@@ -977,7 +977,7 @@ private:
 #endif
     Entry Entries[NumEntries];
   };
-  AllocationRingBuffer RingBuffer;
+  AllocationRingBuffer RingBuffer = {};
 
   // The following might get optimized out by the compiler.
   NOINLINE void performSanityChecks() {
