@@ -246,9 +246,9 @@ private:
   alignas(SCUDO_CACHE_LINE_SIZE) HybridMutex CacheMutex;
   CacheT Cache;
   alignas(SCUDO_CACHE_LINE_SIZE) HybridMutex RecycleMutex;
-  atomic_uptr MinSize;
-  atomic_uptr MaxSize;
-  alignas(SCUDO_CACHE_LINE_SIZE) atomic_uptr MaxCacheSize;
+  atomic_uptr MinSize = {};
+  atomic_uptr MaxSize = {};
+  alignas(SCUDO_CACHE_LINE_SIZE) atomic_uptr MaxCacheSize = {};
 
   void NOINLINE recycle(uptr MinSize, Callback Cb) {
     CacheT Tmp;
