@@ -10,14 +10,25 @@
 
 # CHECK: -- Testing:
 # CHECK: PASS: googletest-upstream-format :: {{[Dd]ummy[Ss]ub[Dd]ir}}/OneTest.py/FirstTest.subTestA
-# CHECK: FAIL: googletest-upstream-format :: {{[Dd]ummy[Ss]ub[Dd]ir}}/OneTest.py/FirstTest.subTestB
-# CHECK-NEXT: *** TEST 'googletest-upstream-format :: {{[Dd]ummy[Ss]ub[Dd]ir}}/OneTest.py/FirstTest.subTestB' FAILED ***
+# CHECK: FAIL: googletest-upstream-format :: [[PATH:[Dd]ummy[Ss]ub[Dd]ir/]][[FILE:OneTest\.py]]/[[TEST:FirstTest\.subTestB]]
+# CHECK-NEXT: *** TEST 'googletest-upstream-format :: [[PATH]][[FILE]]/[[TEST]]' FAILED ***
+# CHECK-NEXT: Script:
+# CHECK-NEXT: --
+# CHECK-NEXT: [[FILE]] --gtest_filter=[[TEST]]
+# CHECK-NEXT: --
 # CHECK-NEXT: Running main() from gtest_main.cc
 # CHECK-NEXT: I am subTest B, I FAIL
 # CHECK-NEXT: And I have two lines of output
-# CHECK: ***
 # CHECK: SKIPPED: googletest-upstream-format :: {{[Dd]ummy[Ss]ub[Dd]ir}}/OneTest.py/FirstTest.subTestC
-# CHECK: UNRESOLVED: googletest-upstream-format :: {{[Dd]ummy[Ss]ub[Dd]ir}}/OneTest.py/FirstTest.subTestD
+# CHECK: UNRESOLVED: googletest-upstream-format :: [[PATH:[Dd]ummy[Ss]ub[Dd]ir/]][[FILE:OneTest\.py]]/[[TEST:FirstTest\.subTestD]]
+# CHECK-NEXT: *** TEST 'googletest-upstream-format :: [[PATH]][[FILE]]/[[TEST]]' FAILED ***
+# CHECK-NEXT: Script:
+# CHECK-NEXT: --
+# CHECK-NEXT: [[FILE]] --gtest_filter=[[TEST]]
+# CHECK-NEXT: --
+# CHECK-NEXT: Unable to find [ PASSED ] 1 test. in gtest output
+# CHECK: I am subTest D, I am UNRESOLVED
+# CHECK: ***
 # CHECK: PASS: googletest-upstream-format :: {{[Dd]ummy[Ss]ub[Dd]ir}}/OneTest.py/ParameterizedTest/0.subTest
 # CHECK: PASS: googletest-upstream-format :: {{[Dd]ummy[Ss]ub[Dd]ir}}/OneTest.py/ParameterizedTest/1.subTest
 # CHECK: Failed Tests (1)
