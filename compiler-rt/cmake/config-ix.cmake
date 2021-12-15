@@ -169,6 +169,9 @@ check_library_exists(stdc++ __cxa_throw "" COMPILER_RT_HAS_LIBSTDCXX)
 # Linker flags.
 compiler_rt_check_linker_flag("-Wl,-z,text" COMPILER_RT_HAS_Z_TEXT)
 compiler_rt_check_linker_flag("-fuse-ld=lld" COMPILER_RT_HAS_FUSE_LD_LLD_FLAG)
+if (LLVM_USE_LINKER)
+  compiler_rt_check_linker_flag("-fuse-ld=${LLVM_USE_LINKER}" COMPILER_RT_HAS_FUSE_LD_LLVM_LINKER)
+endif()
 
 set(VERS_COMPAT_OPTION "-Wl,-z,gnu-version-script-compat")
 compiler_rt_check_linker_flag("${VERS_COMPAT_OPTION}" COMPILER_RT_HAS_GNU_VERSION_SCRIPT_COMPAT)

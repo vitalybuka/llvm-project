@@ -4,7 +4,8 @@
 // https://code.google.com/p/address-sanitizer/issues/detail?id=260
 // REQUIRES: lld
 // FIXME: This may pass on Android, with non-emulated-tls.
-// XFAIL: android
+// FIXME: Before D115812 only android set "lld" in tests but it was XFAIL.
+// XFAIL: *
 int undefined();
 
 // On i386 clang adds --export-dynamic when linking with ASan, which adds all
