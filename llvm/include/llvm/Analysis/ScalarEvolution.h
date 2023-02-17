@@ -1297,41 +1297,47 @@ public:
   bool loopIsFiniteByAssumption(const Loop *L);
 
   class FoldID {
-    SmallVector<unsigned, 8> Bits;
+    //SmallVector<unsigned, 8> Bits;
+    uintptr_t P1;
+    uintptr_t P2;
+    unsigned C;
 
   public:
-    void addInteger(unsigned long I) { Bits.push_back(I); }
-    void addInteger(unsigned I) { Bits.push_back(I); }
-    void addInteger(int I) { Bits.push_back(I); }
+    FoldID(unsigned C, const void* P1, const void* P2) : P1(reinterpret_cast<uintptr_t>(P1)), P2(reinterpret_cast<uintptr_t>(P2)), C(C) {};
+    // void addInteger(unsigned long I) { Bits.push_back(I); }
+    // void addInteger(unsigned I) { Bits.push_back(I); }
+    // void addInteger(int I) { Bits.push_back(I); }
 
-    void addInteger(unsigned long long I) {
-      addInteger(unsigned(I));
-      addInteger(unsigned(I >> 32));
-    }
+    // void addInteger(unsigned long long I) {
+    //   addInteger(unsigned(I));
+    //   addInteger(unsigned(I >> 32));
+    // }
 
-    void addPointer(const void *Ptr) {
-      // Note: this adds pointers to the hash using sizes and endianness that
-      // depend on the host. It doesn't matter, however, because hashing on
-      // pointer values is inherently unstable. Nothing should depend on the
-      // ordering of nodes in the folding set.
-      static_assert(sizeof(uintptr_t) <= sizeof(unsigned long long),
-                    "unexpected pointer size");
-      addInteger(reinterpret_cast<uintptr_t>(Ptr));
-    }
+    // void addPointer(const void *Ptr) {
+    //   // Note: this adds pointers to the hash using sizes and endianness that
+    //   // depend on the host. It doesn't matter, however, because hashing on
+    //   // pointer values is inherently unstable. Nothing should depend on the
+    //   // ordering of nodes in the folding set.
+    //   static_assert(sizeof(uintptr_t) <= sizeof(unsigned long long),
+    //                 "unexpected pointer size");
+    //   addInteger(reinterpret_cast<uintptr_t>(Ptr));
+    // }
 
     unsigned computeHash() const {
-      unsigned Hash = Bits.size();
-      for (unsigned I = 0; I != Bits.size(); ++I)
-        Hash = detail::combineHashValue(Hash, Bits[I]);
+      unsigned Hash = C;
+      // for (unsigned I = 0; I != Bits.size(); ++I)
+      Hash = detail::combineHashValue(Hash, P1);
+      Hash = detail::combineHashValue(Hash, P2);
       return Hash;
     }
     bool operator==(const FoldID &RHS) const {
-      if (Bits.size() != RHS.Bits.size())
-        return false;
-      for (unsigned I = 0; I != Bits.size(); ++I)
-        if (Bits[I] != RHS.Bits[I])
-          return false;
-      return true;
+      return std::tie(C, P1, P2) == std::tie(RHS.C, RHS.P1, RHS.P2);
+      // if (Bits.size() != RHS.Bits.size())
+      //   return false;
+      // for (unsigned I = 0; I != Bits.size(); ++I)
+      //   if (Bits[I] != RHS.Bits[I])
+      //     return false;
+      // return true;
     }
   };
 
@@ -2364,13 +2370,13 @@ private:
 
 template <> struct DenseMapInfo<ScalarEvolution::FoldID> {
   static inline ScalarEvolution::FoldID getEmptyKey() {
-    ScalarEvolution::FoldID ID;
-    ID.addInteger(~0ULL);
+    ScalarEvolution::FoldID ID(~0U, nullptr, nullptr);
+    //ID.addInteger(~0ULL);
     return ID;
   }
   static inline ScalarEvolution::FoldID getTombstoneKey() {
-    ScalarEvolution::FoldID ID;
-    ID.addInteger(~0ULL - 1ULL);
+    ScalarEvolution::FoldID ID(~0U - 1U, nullptr, nullptr);
+    //ID.addInteger(~0ULL - 1ULL);
     return ID;
   }
 
