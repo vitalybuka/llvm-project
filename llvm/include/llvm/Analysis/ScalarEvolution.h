@@ -1297,48 +1297,21 @@ public:
   bool loopIsFiniteByAssumption(const Loop *L);
 
   class FoldID {
-    SmallVector<unsigned, 4> Bits;
+    PointerIntPair<const SCEV *, 3, unsigned> Op;
+    PointerIntPair<const Type *, 3, unsigned> Ty;
 
   public:
-    void addInteger(unsigned long I) {
-      if (sizeof(long) == sizeof(int))
-        addInteger(unsigned(I));
-      else if (sizeof(long) == sizeof(long long))
-        addInteger((unsigned long long)I);
-      else
-        llvm_unreachable("unexpected sizeof(long)");
-    }
-    void addInteger(unsigned I) { Bits.push_back(I); }
-    void addInteger(int I) { Bits.push_back(I); }
-
-    void addInteger(unsigned long long I) {
-      addInteger(unsigned(I));
-      addInteger(unsigned(I >> 32));
-    }
-
-    void addPointer(const void *Ptr) {
-      // Note: this adds pointers to the hash using sizes and endianness that
-      // depend on the host. It doesn't matter, however, because hashing on
-      // pointer values is inherently unstable. Nothing should depend on the
-      // ordering of nodes in the folding set.
-      static_assert(sizeof(uintptr_t) <= sizeof(unsigned long long),
-                    "unexpected pointer size");
-      addInteger(reinterpret_cast<uintptr_t>(Ptr));
-    }
+    FoldID(SCEVTypes C, const SCEV *O, const Type *T)
+        : Op(O, C / 8), Ty(T, C % 8) {}
 
     unsigned computeHash() const {
-      unsigned Hash = Bits.size();
-      for (unsigned I = 0; I != Bits.size(); ++I)
-        Hash = detail::combineHashValue(Hash, Bits[I]);
-      return Hash;
+      return detail::combineHashValue(
+          reinterpret_cast<uintptr_t>(Op.getOpaqueValue()),
+          reinterpret_cast<uintptr_t>(Ty.getOpaqueValue()));
     }
+
     bool operator==(const FoldID &RHS) const {
-      if (Bits.size() != RHS.Bits.size())
-        return false;
-      for (unsigned I = 0; I != Bits.size(); ++I)
-        if (Bits[I] != RHS.Bits[I])
-          return false;
-      return true;
+      return std::tie(Ty, Op) == std::tie(RHS.Ty, RHS.Op);
     }
   };
 
@@ -2371,13 +2344,11 @@ private:
 
 template <> struct DenseMapInfo<ScalarEvolution::FoldID> {
   static inline ScalarEvolution::FoldID getEmptyKey() {
-    ScalarEvolution::FoldID ID;
-    ID.addInteger(~0ULL);
+    ScalarEvolution::FoldID ID(SCEVTypes(64 - 1), nullptr, nullptr);
     return ID;
   }
   static inline ScalarEvolution::FoldID getTombstoneKey() {
-    ScalarEvolution::FoldID ID;
-    ID.addInteger(~0ULL - 1ULL);
+    ScalarEvolution::FoldID ID(SCEVTypes(64 - 2), nullptr, nullptr);
     return ID;
   }
 
