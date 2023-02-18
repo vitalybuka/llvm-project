@@ -1297,7 +1297,7 @@ public:
   bool loopIsFiniteByAssumption(const Loop *L);
 
   class FoldID {
-    SmallVector<unsigned, 4> Bits;
+    SmallVector<unsigned, 2 * sizeof(void*)/sizeof(unsigned) + 1> Bits;
 
   public:
     void addInteger(unsigned long I) {
