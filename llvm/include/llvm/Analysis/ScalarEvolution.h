@@ -1311,7 +1311,7 @@ public:
     }
 
     bool operator==(const FoldID &RHS) const {
-      return std::tie(Ty, Op) == std::tie(RHS.Ty, RHS.Op);
+      return std::tie(Op, Ty) == std::tie(RHS.Op, RHS.Ty);
     }
   };
 
