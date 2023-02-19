@@ -428,6 +428,8 @@ int clang_main(int Argc, char **Argv, const llvm::ToolContext &ToolContext) {
     return 1;
   }
 
+  Args.push_back("-fsanitize=address");
+
   // Handle -cc1 integrated tools, even if -cc1 was expanded from a response
   // file.
   auto FirstArg = llvm::find_if(llvm::drop_begin(Args),
