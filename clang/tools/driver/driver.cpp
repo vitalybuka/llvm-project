@@ -429,7 +429,7 @@ int clang_main(int Argc, char **Argv, const llvm::ToolContext &ToolContext) {
   }
 
   Args.push_back("-fsanitize=undefined");
-  Args.push_back("-fno-sanitize=alignment,bool,builtin,bounds,enum,float-cast-overflow,float-divide-by-zero,function");
+  Args.push_back("-fno-sanitize=alignment,bool,builtin,bounds,enum,float-cast-overflow,float-divide-by-zero,function,implicit-unsigned-integer-truncation");
 
   // Handle -cc1 integrated tools, even if -cc1 was expanded from a response
   // file.
