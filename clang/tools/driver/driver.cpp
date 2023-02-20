@@ -429,7 +429,7 @@ int clang_main(int Argc, char **Argv, const llvm::ToolContext &ToolContext) {
   }
 
   Args.push_back("-fsanitize=undefined");
-  Args.push_back("-fno-sanitize=alignment,bool,builtin,bounds,enum");
+  Args.push_back("-fno-sanitize=alignment,bool,builtin,bounds,enum,float-cast-overflow");
 
   // Handle -cc1 integrated tools, even if -cc1 was expanded from a response
   // file.
