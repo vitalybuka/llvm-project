@@ -260,7 +260,7 @@ int clang_main(int Argc, char **Argv, const llvm::ToolContext &ToolContext) {
   }
 
   Args.push_back("-fsanitize=undefined");
-  Args.push_back("-fno-sanitize=alignment,bool,builtin,bounds,enum,float-cast-overflow,float-divide-by-zero,function,implicit-unsigned-integer-truncation,implicit-signed-integer-truncation,integer-divide-by-zero,nonnull-attribute,null,nullability-arg,nullability-assign,nullability-return,objc-cast,object-size,pointer-overflow,return,returns-nonnull-attribute,shift");
+  Args.push_back("-fno-sanitize=alignment,bool,builtin,bounds,enum,float-cast-overflow,float-divide-by-zero,function,implicit-unsigned-integer-truncation,implicit-signed-integer-truncation,integer-divide-by-zero,nonnull-attribute,null,nullability-arg,nullability-assign,nullability-return,objc-cast,object-size,pointer-overflow,return,returns-nonnull-attribute,shift,unsigned-shift-base");
 
   // Handle -cc1 integrated tools.
   if (Args.size() >= 2 && StringRef(Args[1]).starts_with("-cc1"))
