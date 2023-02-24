@@ -430,6 +430,7 @@ int clang_main(int Argc, char **Argv, const llvm::ToolContext &ToolContext) {
 
   Args.push_back("-fsanitize=undefined");
   Args.push_back("-fno-sanitize=vptr,function");
+  Args.push_back("-fno-sanitize-recover=all");
 
   // Handle -cc1 integrated tools, even if -cc1 was expanded from a response
   // file.
