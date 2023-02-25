@@ -1302,21 +1302,26 @@ public:
   bool loopIsFiniteByAssumption(const Loop *L);
 
   class FoldID {
-    PointerIntPair<const SCEV *, 3, unsigned> Op;
-    PointerIntPair<const Type *, 3, unsigned> Ty;
+    const SCEV * Op = nullptr;
+    const Type * Ty = nullptr;
+    unsigned short C;
 
   public:
-    FoldID(SCEVTypes C, const SCEV *O, const Type *T)
-        : Op(O, C / 8), Ty(T, C % 8) {}
+    FoldID(SCEVTypes C, const SCEV *Op, const Type *Ty) : Op(Op), Ty(Ty), C(C) {
+      assert(Op);
+      assert(Ty);
+    }
+
+    FoldID(unsigned short C) : C(C) {}
 
     unsigned computeHash() const {
       return detail::combineHashValue(
-          reinterpret_cast<uintptr_t>(Op.getOpaqueValue()),
-          reinterpret_cast<uintptr_t>(Ty.getOpaqueValue()));
+          C, detail::combineHashValue(reinterpret_cast<uintptr_t>(Op),
+                                      reinterpret_cast<uintptr_t>(Ty)));
     }
 
     bool operator==(const FoldID &RHS) const {
-      return std::tie(Op, Ty) == std::tie(RHS.Op, RHS.Ty);
+      return std::tie(Op, Ty, C) == std::tie(RHS.Op, RHS.Ty, RHS.C);
     }
   };
 
@@ -2360,11 +2365,11 @@ private:
 
 template <> struct DenseMapInfo<ScalarEvolution::FoldID> {
   static inline ScalarEvolution::FoldID getEmptyKey() {
-    ScalarEvolution::FoldID ID(SCEVTypes(64 - 1), nullptr, nullptr);
+    ScalarEvolution::FoldID ID(0);
     return ID;
   }
   static inline ScalarEvolution::FoldID getTombstoneKey() {
-    ScalarEvolution::FoldID ID(SCEVTypes(64 - 2), nullptr, nullptr);
+    ScalarEvolution::FoldID ID(1);
     return ID;
   }
 
