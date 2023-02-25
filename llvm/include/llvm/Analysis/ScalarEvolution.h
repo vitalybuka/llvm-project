@@ -1315,9 +1315,7 @@ public:
     FoldID(unsigned short C) : C(C) {}
 
     unsigned computeHash() const {
-      return detail::combineHashValue(
-          C, detail::combineHashValue(reinterpret_cast<uintptr_t>(Op),
-                                      reinterpret_cast<uintptr_t>(Ty)));
+      return reinterpret_cast<uintptr_t>(Op);
     }
 
     bool operator==(const FoldID &RHS) const {
