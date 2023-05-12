@@ -53,7 +53,7 @@ template <typename Ptr> struct PunnedPointer {
   const Ptr *getPointerAddress() const { return reinterpret_cast<Ptr *>(Data); }
 
 private:
-  alignas(Ptr) unsigned char Data[sizeof(Ptr)];
+  alignas(Ptr) unsigned char Data[sizeof(Ptr)] = {};
 };
 } // namespace detail
 
