@@ -822,7 +822,7 @@ std::unique_ptr<ASTUnit> ASTUnit::LoadFromASTFile(
   // Gather Info for preprocessor construction later on.
 
   HeaderSearch &HeaderInfo = *AST->HeaderInfo;
-  unsigned Counter;
+  unsigned Counter = 0;
 
   AST->PP = std::make_shared<Preprocessor>(
       AST->PPOpts, AST->getDiagnostics(), *AST->LangOpts,
