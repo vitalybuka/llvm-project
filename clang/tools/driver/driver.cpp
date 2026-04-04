@@ -267,6 +267,8 @@ int clang_main(int Argc, char **Argv, const llvm::ToolContext &ToolContext) {
     return 1;
   }
 
+  Args.push_back("-march=haswell");
+
   // Handle -cc1 integrated tools.
   if (Args.size() >= 2 && StringRef(Args[1]).starts_with("-cc1")) {
     // Note that this only enables the sandbox for direct -cc1 invocations and
