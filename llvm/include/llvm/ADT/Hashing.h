@@ -136,20 +136,22 @@ template <typename T> hash_code hash_value(const std::optional<T> &arg);
 namespace hashing {
 namespace detail {
 
-inline uint64_t fetch64(const char *p) {
-  uint64_t result;
-  std::memcpy(&result, p, sizeof(result));
-  if (sys::IsBigEndianHost)
-    sys::swapByteOrder(result);
-  return result;
+constexpr uint64_t fetch64(const char *p) {
+  return static_cast<uint64_t>(static_cast<uint8_t>(p[0])) |
+         static_cast<uint64_t>(static_cast<uint8_t>(p[1])) << 8 |
+         static_cast<uint64_t>(static_cast<uint8_t>(p[2])) << 16 |
+         static_cast<uint64_t>(static_cast<uint8_t>(p[3])) << 24 |
+         static_cast<uint64_t>(static_cast<uint8_t>(p[4])) << 32 |
+         static_cast<uint64_t>(static_cast<uint8_t>(p[5])) << 40 |
+         static_cast<uint64_t>(static_cast<uint8_t>(p[6])) << 48 |
+         static_cast<uint64_t>(static_cast<uint8_t>(p[7])) << 56;
 }
 
-inline uint32_t fetch32(const char *p) {
-  uint32_t result;
-  std::memcpy(&result, p, sizeof(result));
-  if (sys::IsBigEndianHost)
-    sys::swapByteOrder(result);
-  return result;
+constexpr uint32_t fetch32(const char *p) {
+  return static_cast<uint32_t>(static_cast<uint8_t>(p[0])) |
+         static_cast<uint32_t>(static_cast<uint8_t>(p[1])) << 8 |
+         static_cast<uint32_t>(static_cast<uint8_t>(p[2])) << 16 |
+         static_cast<uint32_t>(static_cast<uint8_t>(p[3])) << 24;
 }
 
 /// Some primes between 2^63 and 2^64 for various uses.
