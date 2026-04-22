@@ -190,18 +190,18 @@ constexpr uint64_t hash_1to3_bytes(const char *s, size_t len, uint64_t seed) {
   return shift_mix(y * k2 ^ z * k3 ^ seed) * k2;
 }
 
-inline uint64_t hash_4to8_bytes(const char *s, size_t len, uint64_t seed) {
+constexpr uint64_t hash_4to8_bytes(const char *s, size_t len, uint64_t seed) {
   uint64_t a = fetch32(s);
   return hash_16_bytes(len + (a << 3), seed ^ fetch32(s + len - 4));
 }
 
-inline uint64_t hash_9to16_bytes(const char *s, size_t len, uint64_t seed) {
+constexpr uint64_t hash_9to16_bytes(const char *s, size_t len, uint64_t seed) {
   uint64_t a = fetch64(s);
   uint64_t b = fetch64(s + len - 8);
   return hash_16_bytes(seed ^ a, rotate(b + len, len)) ^ b;
 }
 
-inline uint64_t hash_17to32_bytes(const char *s, size_t len, uint64_t seed) {
+constexpr uint64_t hash_17to32_bytes(const char *s, size_t len, uint64_t seed) {
   uint64_t a = fetch64(s) * k1;
   uint64_t b = fetch64(s + 8);
   uint64_t c = fetch64(s + len - 8) * k2;
@@ -211,7 +211,7 @@ inline uint64_t hash_17to32_bytes(const char *s, size_t len, uint64_t seed) {
                        a + llvm::rotr<uint64_t>(b ^ k3, 20) - c + len + seed);
 }
 
-inline uint64_t hash_33to64_bytes(const char *s, size_t len, uint64_t seed) {
+constexpr uint64_t hash_33to64_bytes(const char *s, size_t len, uint64_t seed) {
   uint64_t z = fetch64(s + 24);
   uint64_t a = fetch64(s) + (len + fetch64(s + len - 16)) * k0;
   uint64_t b = llvm::rotr<uint64_t>(a + z, 52);
@@ -234,7 +234,7 @@ inline uint64_t hash_33to64_bytes(const char *s, size_t len, uint64_t seed) {
   return shift_mix((seed ^ (r * k0)) + vs) * k2;
 }
 
-inline uint64_t hash_short(const char *s, size_t length, uint64_t seed) {
+constexpr uint64_t hash_short(const char *s, size_t length, uint64_t seed) {
   if (length >= 4 && length <= 8)
     return hash_4to8_bytes(s, length, seed);
   if (length > 8 && length <= 16)
@@ -258,7 +258,7 @@ struct hash_state {
   /// Create a new hash_state structure and initialize it based on the
   /// seed and the first 64-byte chunk.
   /// This effectively performs the initial mix.
-  static hash_state create(const char *s, uint64_t seed) {
+  static constexpr hash_state create(const char *s, uint64_t seed) {
     hash_state state = {0,
                         seed,
                         hash_16_bytes(seed, k1),
@@ -273,7 +273,7 @@ struct hash_state {
 
   /// Mix 32-bytes from the input sequence into the 16-bytes of 'a'
   /// and 'b', including whatever is already in 'a' and 'b'.
-  static void mix_32_bytes(const char *s, uint64_t &a, uint64_t &b) {
+  static constexpr void mix_32_bytes(const char *s, uint64_t &a, uint64_t &b) {
     a += fetch64(s);
     uint64_t c = fetch64(s + 24);
     b = llvm::rotr<uint64_t>(b + a + c, 21);
@@ -286,7 +286,7 @@ struct hash_state {
   /// Mix in a 64-byte buffer of data.
   /// We mix all 64 bytes even when the chunk length is smaller, but we
   /// record the actual length.
-  void mix(const char *s) {
+  constexpr void mix(const char *s) {
     h0 = llvm::rotr<uint64_t>(h0 + h1 + h3 + fetch64(s + 8), 37) * k1;
     h1 = llvm::rotr<uint64_t>(h1 + h4 + fetch64(s + 48), 42) * k1;
     h0 ^= h6;
