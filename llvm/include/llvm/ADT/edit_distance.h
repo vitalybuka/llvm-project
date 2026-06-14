@@ -59,6 +59,8 @@ unsigned ComputeMappedEditDistance(ArrayRef<T> FromArray, ArrayRef<T> ToArray,
   // iteration, and the top-left entry is stored in Previous.
   typename ArrayRef<T>::size_type m = FromArray.size();
   typename ArrayRef<T>::size_type n = ToArray.size();
+  if (m == n && FromArray.data() == ToArray.data())
+    return 0;
 
   if (MaxEditDistance) {
     // If the difference in size between the 2 arrays is larger than the max
