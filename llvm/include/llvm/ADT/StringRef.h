@@ -909,9 +909,9 @@ public:
 inline bool operator==(StringRef LHS, StringRef RHS) {
   if (LHS.size() != RHS.size())
     return false;
-  if (LHS.empty())
-    return true;
   if (LHS.data() == RHS.data())
+    return true;
+  if (LHS.empty())
     return true;
   return ::memcmp(LHS.data(), RHS.data(), LHS.size()) == 0;
 }
