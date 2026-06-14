@@ -74,7 +74,7 @@ private:
   // Workaround memcmp issue with null pointers (undefined behavior)
   // by providing a specialized version
   static int compareMemory(const char *Lhs, const char *Rhs, size_t Length) {
-    if (Length == 0)
+    if (Length == 0 || Lhs == Rhs)
       return 0;
     return ::memcmp(Lhs, Rhs, Length);
   }
