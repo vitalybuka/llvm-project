@@ -911,6 +911,8 @@ inline bool operator==(StringRef LHS, StringRef RHS) {
     return false;
   if (LHS.empty())
     return true;
+  if (LHS.data() == RHS.data())
+    return true;
   return ::memcmp(LHS.data(), RHS.data(), LHS.size()) == 0;
 }
 
