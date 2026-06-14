@@ -532,6 +532,7 @@ template <typename T>
 }
 
 template <typename T> inline bool operator<(ArrayRef<T> LHS, ArrayRef<T> RHS) {
+  if (LHS.data() == RHS.data()) return LHS.size() < RHS.size();
   return std::lexicographical_compare(LHS.begin(), LHS.end(), RHS.begin(),
                                       RHS.end());
 }
