@@ -177,6 +177,8 @@ public:
   bool equals(ArrayRef RHS) const {
     if (Length != RHS.Length)
       return false;
+    if (data() == RHS.data())
+      return true;
     return std::equal(begin(), end(), RHS.begin());
   }
 
