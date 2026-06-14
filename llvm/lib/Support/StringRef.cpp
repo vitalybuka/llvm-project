@@ -20,6 +20,8 @@ using namespace llvm;
 // strncasecmp() is not available on non-POSIX systems, so define an
 // alternative function here.
 static int ascii_strncasecmp(StringRef LHS, StringRef RHS) {
+  if (LHS.data() == RHS.data())
+    return 0;
   for (auto [LC, RC] : zip_equal(LHS, RHS)) {
     unsigned char LHC = toLower(LC);
     unsigned char RHC = toLower(RC);
